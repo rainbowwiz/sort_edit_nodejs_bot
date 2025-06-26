@@ -3,6 +3,7 @@ from pathlib import Path
 
 def process_federal_files(company_path: Path, federal_path: Path):
     federal_path.mkdir(exist_ok=True)
+    print("Starting federal processing")
 
     for subfolder in sorted(company_path.iterdir()):
         if subfolder.is_dir():
@@ -20,3 +21,6 @@ def process_federal_files(company_path: Path, federal_path: Path):
 
                 # Remove original file from company folder
                 file.unlink()
+
+    print("Federal processing complete")
+    

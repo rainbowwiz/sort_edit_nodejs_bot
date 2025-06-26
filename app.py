@@ -31,6 +31,7 @@ class SortFilesApp:
 
     def run_workflow(self):
         try:
+            print(f"📁 Starting workflow with work directory: {self.work_dir}")
             company = self.work_dir / 'company'
             w2 = self.work_dir / 'W2'
             output_data = self.work_dir / 'output_data'
@@ -40,14 +41,30 @@ class SortFilesApp:
             envelopes = self.work_dir / 'envelopes'
 
             people_dirs = list(output_data.glob('peopleinput*/docs'))
+            print(f"📁 Found {len(people_dirs)} peopleinput*/docs directories")
 
+            # Step 1: Process federal files (commented out until needed)
+            print("📄 Running process_federal_files")
             # process_federal_files(company, federal)
-            attach_w2_to_stfcs(company, w2, state)
-            # combine_state_files(state, combined)
-            # create_envelope_docs(combined, people_dirs, envelopes)
+
+            # Step 2: Attach W2 pages to STFCS files
+            print("📄 Running attach_w2_to_stfcs")
+            # attach_w2_to_stfcs(company, w2, state)
+
+            # Step 3: Combine state files into groups of up to 30
+            print("📄 Running combine_state_files")
+            all_name_lists = combine_state_files(state, combined)
+            print(f"✅ Retrieved name lists for {len(all_name_lists)} combined PDFs")
+            for i, name_list in enumerate(all_name_lists, 1):
+                print(f"Combined PDF {i} names: {name_list}")
+
+            # Step 4: Create envelope documents (commented out until requirements provided)
+            print("📄 Running create_envelope_docs")
+            create_envelope_docs(combined, people_dirs, all_name_lists, envelopes)
 
             messagebox.showinfo("Done", "All processing complete!")
         except Exception as e:
+            print(f"❌ Workflow error: {e}")
             messagebox.showerror("Error", f"An error occurred:\n{e}")
 
 if __name__ == '__main__':

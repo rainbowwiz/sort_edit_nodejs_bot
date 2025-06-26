@@ -41,7 +41,7 @@ class SortFilesApp:
 
             people_dirs = list(output_data.glob('peopleinput*/docs'))
 
-            process_federal_files(company, federal)
+            # process_federal_files(company, federal)
             attach_w2_to_stfcs(company, w2, state)
             # combine_state_files(state, combined)
             # create_envelope_docs(combined, people_dirs, envelopes)

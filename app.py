@@ -1,6 +1,10 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from pathlib import Path
+import threading
+import itertools
+import time
+
 from processors.federal_processor import process_federal_files
 from processors.state_processor import attach_w2_to_stfcs
 from processors.combiner import combine_state_files
@@ -10,8 +14,9 @@ class SortFilesApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Sort Files Software")
-        self.root.geometry("450x250")
+        self.root.geometry("450x300")
         self.work_dir = None
+        self.spinner_running = False
 
         self.label = tk.Label(root, text="Please select your work directory", wraplength=400)
         self.label.pack(pady=10)
@@ -19,8 +24,11 @@ class SortFilesApp:
         self.select_btn = tk.Button(root, text="Select Work Directory", command=self.select_directory)
         self.select_btn.pack(pady=5)
 
-        self.process_btn = tk.Button(root, text="Start Processing", command=self.run_workflow, state=tk.DISABLED)
+        self.process_btn = tk.Button(root, text="Start Processing", command=self.start_workflow_thread, state=tk.DISABLED)
         self.process_btn.pack(pady=15)
+
+        self.spinner_label = tk.Label(root, text="", font=("Courier", 16))
+        self.spinner_label.pack(pady=10)
 
     def select_directory(self):
         folder_selected = filedialog.askdirectory()
@@ -28,6 +36,24 @@ class SortFilesApp:
             self.work_dir = Path(folder_selected)
             self.label.config(text=f"Selected: {self.work_dir}")
             self.process_btn.config(state=tk.NORMAL)
+
+    def start_workflow_thread(self):
+        # Disable buttons while processing
+        self.process_btn.config(state=tk.DISABLED)
+        self.select_btn.config(state=tk.DISABLED)
+
+        # Start spinner
+        self.spinner_running = True
+        threading.Thread(target=self.animate_spinner, daemon=True).start()
+
+        # Run workflow in background thread
+        threading.Thread(target=self.run_workflow, daemon=True).start()
+
+    def animate_spinner(self):
+        spinner_cycle = itertools.cycle(['|', '/', '-', '\\'])
+        while self.spinner_running:
+            self.spinner_label.config(text=next(spinner_cycle) + " Processing...")
+            time.sleep(0.1)
 
     def run_workflow(self):
         try:
@@ -43,22 +69,18 @@ class SortFilesApp:
             people_dirs = list(output_data.glob('peopleinput*/docs'))
             print(f"📁 Found {len(people_dirs)} peopleinput*/docs directories")
 
-            # Step 1: Process federal files (commented out until needed)
             print("📄 Running process_federal_files")
             process_federal_files(company, federal)
 
-            # Step 2: Attach W2 pages to STFCS files
             print("📄 Running attach_w2_to_stfcs")
             attach_w2_to_stfcs(company, w2, state)
 
-            # Step 3: Combine state files into groups of up to 30
             print("📄 Running combine_state_files")
             all_name_lists = combine_state_files(state, combined)
             print(f"✅ Retrieved name lists for {len(all_name_lists)} combined PDFs")
             for i, name_list in enumerate(all_name_lists, 1):
                 print(f"Combined PDF {i} names: {name_list}")
 
-            # Step 4: Create envelope documents (commented out until requirements provided)
             print("📄 Running create_envelope_docs")
             create_envelope_docs(combined, people_dirs, all_name_lists, envelopes)
 
@@ -66,6 +88,12 @@ class SortFilesApp:
         except Exception as e:
             print(f"❌ Workflow error: {e}")
             messagebox.showerror("Error", f"An error occurred:\n{e}")
+        finally:
+            self.spinner_running = False
+            self.spinner_label.config(text="")
+            # Re-enable buttons
+            self.select_btn.config(state=tk.NORMAL)
+            self.process_btn.config(state=tk.NORMAL)
 
 if __name__ == '__main__':
     root = tk.Tk()

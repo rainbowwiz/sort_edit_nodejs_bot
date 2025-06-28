@@ -27,7 +27,7 @@ def combine_state_files(state_path: Path, combined_path: Path):
         # Extract 6-digit number from filenames and sort
         file_info = []
         for file in unprocessed_files:
-            match = re.match(r'([A-Za-z]+)_([A-Za-z]+)_(\d{6})\.pdf$', file.name)
+            match = re.match(r'([A-Za-z\-]+)_([A-Za-z]+)_(\d{6})\.pdf$', file.name)
             if match:
                 last, first, digits = match.groups()
                 file_info.append((file, last, first, int(digits)))

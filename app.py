@@ -13,7 +13,7 @@ from processors.envelope_creator import create_envelope_docs
 class SortFilesApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Sort Files Software")
+        self.root.title("Sort & Edit Files Software")
         self.root.geometry("450x300")
         self.work_dir = None
         self.spinner_running = False

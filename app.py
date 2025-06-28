@@ -45,11 +45,11 @@ class SortFilesApp:
 
             # Step 1: Process federal files (commented out until needed)
             print("📄 Running process_federal_files")
-            # process_federal_files(company, federal)
+            process_federal_files(company, federal)
 
             # Step 2: Attach W2 pages to STFCS files
             print("📄 Running attach_w2_to_stfcs")
-            # attach_w2_to_stfcs(company, w2, state)
+            attach_w2_to_stfcs(company, w2, state)
 
             # Step 3: Combine state files into groups of up to 30
             print("📄 Running combine_state_files")

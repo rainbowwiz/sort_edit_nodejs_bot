@@ -38,15 +38,10 @@ class SortFilesApp:
             self.process_btn.config(state=tk.NORMAL)
 
     def start_workflow_thread(self):
-        # Disable buttons while processing
         self.process_btn.config(state=tk.DISABLED)
         self.select_btn.config(state=tk.DISABLED)
-
-        # Start spinner
         self.spinner_running = True
         threading.Thread(target=self.animate_spinner, daemon=True).start()
-
-        # Run workflow in background thread
         threading.Thread(target=self.run_workflow, daemon=True).start()
 
     def animate_spinner(self):
@@ -76,13 +71,11 @@ class SortFilesApp:
             attach_w2_to_stfcs(company, w2, state)
 
             print("📄 Running combine_state_files")
-            all_name_lists = combine_state_files(state, combined)
-            print(f"✅ Retrieved name lists for {len(all_name_lists)} combined PDFs")
-            for i, name_list in enumerate(all_name_lists, 1):
-                print(f"Combined PDF {i} names: {name_list}")
+            combined_info = combine_state_files(state, combined)
+            print(f"✅ Created {len(combined_info)} combined PDFs")
 
             print("📄 Running create_envelope_docs")
-            create_envelope_docs(combined, people_dirs, all_name_lists, envelopes)
+            create_envelope_docs(combined_info, people_dirs, envelopes)
 
             messagebox.showinfo("Done", "All processing complete!")
         except Exception as e:
@@ -91,7 +84,6 @@ class SortFilesApp:
         finally:
             self.spinner_running = False
             self.spinner_label.config(text="")
-            # Re-enable buttons
             self.select_btn.config(state=tk.NORMAL)
             self.process_btn.config(state=tk.NORMAL)
 
